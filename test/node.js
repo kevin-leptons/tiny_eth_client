@@ -1,11 +1,11 @@
 'use strict'
 
 const assert = require('assert')
-const {EthProvider} = require('../lib')._private
+const {Node, NodeStatus} = require('../lib/node')
 
-describe('EthProvider._call', () => {
+describe('Node._call', () => {
     it('succeeded', async () => {
-        let client = new EthProvider({
+        let client = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
         let data = await client._call('eth_getBlockByNumber', ['0x1b4', false])
@@ -14,9 +14,9 @@ describe('EthProvider._call', () => {
     })
 })
 
-describe('EthProvider.getBlockNumber', () => {
+describe('Node.getBlockNumber', () => {
     it('succeeded', async () => {
-        let client = new EthProvider({
+        let client = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
         let blockNumber = await client.getBlockNumber()
@@ -25,14 +25,14 @@ describe('EthProvider.getBlockNumber', () => {
     })
 })
 
-describe('EthProvider.getLogs', () => {
+describe('Node.getLogs', () => {
     it('succeeded', async () => {
-        let client = new EthProvider({
+        let client = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
         let logs = await client.getLogs({
-            fromBlock: '0xCD0A6E', //13437550,
-            toBlock: '0xCD0A6E', //13437550
+            fromBlock: 13437550,
+            toBlock: 13437550
         })
 
         assert.strictEqual(Array.isArray(logs), true)
@@ -40,3 +40,15 @@ describe('EthProvider.getLogs', () => {
     })
 })
 
+describe('Node.getStat', () => {
+    it('succeeded', async () => {
+        let client = new Node({
+            endpoint: 'https://bsc-dataseed.binance.org'
+        })
+        let actualResult = await client.getStat()
+
+        assert.strictEqual(actualResult.status, NodeStatus.OK)
+        assert.strictEqual(typeof actualResult.latestBlockNumer, 'number')
+        assert.strictEqual(actualResult.message, undefined)
+    })
+})
