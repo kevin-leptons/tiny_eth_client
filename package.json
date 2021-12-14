@@ -1,5 +1,5 @@
 {
-  "name": "tiny_eth_client",
+  "name": "@launchzone/tiny_eth_client",
   "version": "0.1.0",
   "description": "Call ETH RPC by the right way",
   "main": "lib/index.js",
