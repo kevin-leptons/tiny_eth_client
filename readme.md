@@ -1,6 +1,6 @@
 # Tiny ETH Client
 
-* Accurate, durable and stable client to interact with ETH node.
+* Accurate, durable and stable client for interacting with ETH node.
 * Limited APIs than Ethereum RPCs.
 
 # Documents
