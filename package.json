@@ -1,6 +1,6 @@
 {
   "name": "tiny_eth_client",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "description": "Call ETH RPC by the right way",
   "main": "lib/index.js",
   "directories": {
