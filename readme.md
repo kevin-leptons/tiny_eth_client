@@ -2,4 +2,9 @@
 
 * Accurate, durable and stable client to interact with ETH node.
 * Limited APIs than Ethereum RPCs.
-* For more details, see [Documents](./doc/readme.md)
+
+# Documents
+
+* [Getting Started](./doc/getting_started.md)
+* [API References](https://kevin-leptons.github.io/tiny_eth_client)
+* [Development](./doc/dev.md)

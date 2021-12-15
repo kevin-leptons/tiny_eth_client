@@ -1,5 +1,6 @@
 /node_modules/
 /doc/
+/docs/
 /test/
 /tmp/
 *.tgz

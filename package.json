@@ -1,5 +1,5 @@
 {
-  "name": "@launchzone/tiny_eth_client",
+  "name": "tiny_eth_client",
   "version": "0.1.0",
   "description": "Call ETH RPC by the right way",
   "main": "lib/index.js",
@@ -11,7 +11,7 @@
   "scripts": {
     "test": "mocha --recursive --timeout 10000",
     "standardize": "trop_standard lib test",
-    "doc": "jsdoc --destination docs --configure doc/jsdoc.json lib",
+    "doc": "jsdoc --destination docs --configure doc/jsdoc.json lib doc/jsdoc_homepage.md",
     "doc-server": "http-server docs",
     "doc-clean": "rm -rf docs"
   },

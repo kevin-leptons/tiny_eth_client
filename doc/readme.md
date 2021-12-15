@@ -6,8 +6,3 @@
 
 ## Development
 
-```bash
-npm install
-npm test
-npm run standardize
-```

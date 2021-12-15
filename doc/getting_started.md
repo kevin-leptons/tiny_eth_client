@@ -1,4 +1,4 @@
-# Examples
+# Getting Started
 
 * [Client](#client)
 * [Contract](#contract)
