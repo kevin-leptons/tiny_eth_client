@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>node.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li><li><a href="Diary.html">Diary</a><ul class='methods'><li data-type='method'><a href="Diary.html#getLogs">getLogs</a></li></ul></li><li><a href="Gateway.html">Gateway</a><ul class='methods'><li data-type='method'><a href="Gateway.html#pickNode">pickNode</a></li></ul></li><li><a href="Node.html">Node</a><ul class='methods'><li data-type='method'><a href="Node.html#call">call</a></li><li data-type='method'><a href="Node.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Node.html#getLogs">getLogs</a></li><li data-type='method'><a href="Node.html#getStat">getStat</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">node.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+const axios = require('axios')
+const {RpcError} = require('./type')
+const {heximalToNumber, numberToHeximal} = require('./formatter')
+
+const {UnsignedInteger} = require('./type')
+
+/**
+ * @enum {number}
+ */
+const NodeStatus = {
+    OK: 0,
+    DISCONNECTED: 1,
+    ERROR: 2
+}
+
+/**
+ * @typedef {object} NodeStat
+ * @property {NodeStatus} status
+ * @property {UnsignedInteger | undefined} latestBlockNumer
+ * @property {string | undefined} message
+ */
+
+class Node {
+    /**
+     *
+     * @param {NodeConfig} config
+     */
+    constructor(config) {
+        this._httpClient = axios.create({
+            baseURL: config.endpoint
+        })
+    }
+
+    /**
+     * @returns {Promise&lt;NodeStat>}
+     */
+    async getStat() {
+        try {
+            return {
+                status: NodeStatus.OK,
+                latestBlockNumer: await this.getBlockNumber()
+            }
+        }
+        catch (error) {
+            return {
+                status: NodeStatus.ERROR,
+                message: error.message
+            }
+        }
+    }
+
+    /**
+     *
+     * @returns {Promise&lt;number>}
+     */
+    async getBlockNumber() {
+        let result = await this._call('eth_blockNumber', [])
+
+        return Number.parseInt(result)
+    }
+
+    /**
+     *
+     * @param {LogFilter} filter
+     * @returns {Promise&lt;Array&lt;Log>>} - List of matched logs.
+     */
+    async getLogs(filter) {
+        let validFilter = Node._standardFilter(filter)
+        let logs = await this._call('eth_getLogs', [
+            validFilter
+        ])
+
+        return logs.map(Node._formatLog)
+    }
+
+    /**
+     *
+     * @param {Promise&lt;Array | object>} params
+     */
+    async call(params) {
+        return await this._call('eth_call', params)
+    }
+
+    /**
+     * @private
+     * @param {string} method
+     * @param {Promise&lt;Array | object>} data
+     */
+    async _call(method, params) {
+        let response = await this._httpClient.post('/', {
+            id: 1,
+            jsonrpc: '2.0',
+            method: method,
+            params: params
+        })
+        let {error, result} = response.data
+
+        if (error) {
+            throw new RpcError(error)
+        }
+
+        return result
+    }
+
+    /**
+     * @private
+     * @param {object} log
+     * @returns {Log}
+     */
+    static _formatLog(log) {
+        let result = Object.assign({}, log)
+
+        result.blockNumber = heximalToNumber(log.blockNumber)
+        result.logIndex = heximalToNumber(log.logIndex)
+        result.transactionIndex = heximalToNumber(log.transactionIndex)
+
+        return result
+    }
+
+    /**
+     * @private
+     * @param {any} filter
+     * @returns {LogFilter}
+     */
+    static _standardFilter(filter) {
+        let validFilter = Object.assign({}, filter)
+
+        validFilter.fromBlock = numberToHeximal(filter.fromBlock)
+        validFilter.toBlock = numberToHeximal(filter.toBlock)
+
+        return validFilter
+    }
+}
+
+module.exports = {
+    Node,
+    NodeStatus
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 18:47:13 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>gateway.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li><li><a href="Diary.html">Diary</a><ul class='methods'><li data-type='method'><a href="Diary.html#getLogs">getLogs</a></li></ul></li><li><a href="Gateway.html">Gateway</a><ul class='methods'><li data-type='method'><a href="Gateway.html#pickNode">pickNode</a></li></ul></li><li><a href="Node.html">Node</a><ul class='methods'><li data-type='method'><a href="Node.html#call">call</a></li><li data-type='method'><a href="Node.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Node.html#getLogs">getLogs</a></li><li data-type='method'><a href="Node.html#getStat">getStat</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">gateway.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+const {NodeStatus} = require('./node')
+
+const {GateWayConfig} = require('./type')
+const {Node, NodeStat} = require('./node')
+
+/**
+ * @typedef {object} TrackedNode
+ * @property {NodeStat} stat
+ * @property {Node} node
+ */
+
+class GatewayError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'GatewayError'
+    }
+}
+
+class Gateway {
+    /**
+     * @param {Array&lt;Node>} nodes
+     * @param {GateWayConfig} config
+     */
+    constructor(nodes, config) {
+        let validConfig = Gateway._standardizeConfig(config)
+
+        this._nodes = nodes
+        this._healthcheckInterval = validConfig.healthcheckInterval
+    }
+
+    async open() {
+        let updateStateNodes = this._updateStateNodes.bind(this)
+
+        await updateStateNodes()
+        this._updateStateNodesTimer = setInterval(
+            () => {
+                updateStateNodes().catch(console.error)
+            },
+            this._healthcheckInterval
+        )
+    }
+
+    // eslint-disable-next-line require-await
+    async close() {
+        if (this._updateStateNodesTimer) {
+            clearInterval(this._updateStateNodesTimer)
+            this._updateStateNodesTimer = undefined
+        }
+    }
+
+    /**
+     * @returns {Promise&lt;Node | undefined>}
+     */
+    pickNode() {
+        if (!this._healthyNodes) {
+            throw new GatewayError('not open yet')
+        }
+
+        return this._healthyNodes[0].node
+    }
+
+    /**
+     * @private
+     */
+    async _updateStateNodes() {
+        let tasks = this._nodes.map(this._getTrackedNode)
+        let trackedNodes = await Promise.all(tasks)
+
+        this._healthyNodes = trackedNodes
+            .filter(node => (node.stat.status === NodeStatus.OK))
+            .sort((n1, n2) => (n2.stat.latestBlock - n1.stat.latestBlock))
+    }
+
+    /**
+     * @private
+     * @param {Node} node
+     * @returns {Array&lt;TrackedNode>}
+     */
+    async _getTrackedNode(node) {
+        return {
+            stat: await node.getStat(),
+            node: node
+        }
+    }
+
+    /**
+     * @private
+     * @param {object} config
+     * @returns {GateWayConfig}
+     */
+    static _standardizeConfig(config) {
+        let defaultConfig = {
+            healthcheckInterval: 3000
+        }
+
+        return Object.assign(defaultConfig, config)
+    }
+}
+
+module.exports = {
+    Gateway,
+    GatewayError
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 18:47:13 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

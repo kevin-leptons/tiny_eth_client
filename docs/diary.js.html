@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>diary.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li><li><a href="Diary.html">Diary</a><ul class='methods'><li data-type='method'><a href="Diary.html#getLogs">getLogs</a></li></ul></li><li><a href="Gateway.html">Gateway</a><ul class='methods'><li data-type='method'><a href="Gateway.html#pickNode">pickNode</a></li></ul></li><li><a href="Node.html">Node</a><ul class='methods'><li data-type='method'><a href="Node.html#call">call</a></li><li data-type='method'><a href="Node.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Node.html#getLogs">getLogs</a></li><li data-type='method'><a href="Node.html#getStat">getStat</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">diary.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+const {isUnsignedInteger} = require('./validator')
+
+const {Gateway} = require('./gateway')
+const {Node} = require('./node')
+const {UnsignedInteger, LogFilter, Log} = require('./type')
+
+/**
+ * @typedef {object} DiaryConfig
+ * @property {UnsignedInteger} maxRetry - Default is 10.
+ */
+
+class DiaryError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'DiaryError'
+    }
+}
+
+class Diary {
+    /**
+     *
+     * @param {Gateway} gateway
+     * @param {DiaryConfig} config
+     */
+    constructor(gateway, config) {
+        let validConfig = Diary._standardConig(config)
+
+        this._gateway = gateway
+        this._maxRetry = validConfig.maxRetry
+    }
+
+    /**
+     *
+     * @param {LogFilter} filter
+     * @returns {Promise&lt;Array&lt;Log>>}
+     */
+    async getLogs(filter) {
+        let nowFilter = Diary._standardizeConfig(filter)
+        let node = this._pickNode()
+        let logs = []
+
+        for (;;) {
+            let logBlock = await node.getLogs(nowFilter)
+
+            if (logBlock.length === 0) {
+                break
+            }
+
+            logs = [...logs, ...logBlock]
+
+            if (logs[logs.length - 1].blockNumber === nowFilter.toBlock) {
+                break
+            }
+
+            nowFilter.fromBlock = logs[logs.length - 1].blockNumber + 1
+        }
+
+        return logs
+    }
+
+    /**
+     * @private
+     * @returns {Node}
+     */
+    _pickNode() {
+        let node = this._gateway.pickNode()
+
+        if (!node) {
+            throw new DiaryError('no avaiable node')
+        }
+
+        return node
+    }
+
+    /**
+     * @private
+     * @param {object} config
+     * @returns {DiaryConfig}
+     */
+    static _standardConig(config) {
+        let defaultConfig = {
+            maxRetry: 10
+        }
+
+        return Object.assign(defaultConfig, config)
+    }
+
+    /**
+     * @private
+     * @param {object} filter
+     * @returns {LogFilter}
+     */
+    static _standardizeConfig(filter) {
+        if (!isUnsignedInteger(filter.fromBlock)) {
+            throw new DiaryError('invalid filter.fromBlock')
+        }
+
+        if (!isUnsignedInteger(filter.toBlock)) {
+            throw new DiaryError('invalid filter.toBlock')
+        }
+
+        if (filter.fromBlock > filter.toBlock) {
+            throw new DiaryError(
+                'filter.fromBlock is greater than filter.toBlock'
+            )
+        }
+
+        return Object.assign({}, filter)
+    }
+}
+
+module.exports = {
+    Diary,
+    DiaryError
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 18:47:13 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+    "opts": {
+        "template": "node_modules/docdash",
+        "recurse": true
+    },
+    "docdash": {
+        "search": true,
+        "typedefs": true,
+        "sort": true
+    }
+}

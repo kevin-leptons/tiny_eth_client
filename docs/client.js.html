@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>client.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li><li><a href="Diary.html">Diary</a><ul class='methods'><li data-type='method'><a href="Diary.html#getLogs">getLogs</a></li></ul></li><li><a href="Gateway.html">Gateway</a><ul class='methods'><li data-type='method'><a href="Gateway.html#pickNode">pickNode</a></li></ul></li><li><a href="Node.html">Node</a><ul class='methods'><li data-type='method'><a href="Node.html#call">call</a></li><li data-type='method'><a href="Node.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Node.html#getLogs">getLogs</a></li><li data-type='method'><a href="Node.html#getStat">getStat</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">client.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+const {Node} = require('./node')
+const {Gateway} = require('./gateway')
+const {Diary} = require('./diary')
+
+/**
+ * @typedef {object} ClientConfig
+ * @property {Array&lt;string>} [endpoints] - List of BSC endpoints.
+ * @property {UnsignedInteger} [reorganisationBlocks] - There is a block "n =
+ * latest - reorganisationBlocks", "latest" is newest mined block number. The
+ * client will not process related things that has block number greater than
+ * n. Default is 6.
+ * @property {UnsignedInteger} [updateProviderInterval] - For each time period,
+ * check health of nodes, in miliseconds. Default is 3000.
+ */
+
+class ClientError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'ClientError'
+    }
+}
+
+class Client {
+    /**
+     * @param {ClientConfig} config
+     */
+    constructor(config) {
+        let validConfig = Client._standardizeConfig(config)
+        let nodes = validConfig.endpoints.map(endpoint => {
+            return new Node({endpoint})
+        })
+
+        this._gateway = new Gateway(nodes, {
+            healthcheckInterval: validConfig.updateProviderInterval
+        })
+        this._reorganisationblocks = validConfig.reorganisationBlocks
+    }
+
+    async open() {
+        await this._gateway.open()
+        this._diary = new Diary(this._gateway)
+    }
+
+    async close() {
+        if (this._gateway) {
+            await this._gateway.close()
+            this._gateway = undefined
+        }
+    }
+
+    /**
+     * @returns {Promise&lt;number>} Latest mined block number.
+     */
+    async getBlockNumber() {
+        let node = this._pickNode()
+
+        return await node.getBlockNumber()
+    }
+
+    /**
+     *
+     * @param {LogFilter} filter
+     */
+    async getLogs(filter) {
+        return await this._diary.getLogs(filter)
+    }
+
+    /**
+     *
+     * @param {string} method
+     * @param {array} data
+     * @returns {Promise&lt;Array | object>}
+     */
+    async call(method, data) {
+        let node = this._pickNode()
+
+        return await node.call(method, data)
+    }
+
+    /**
+     * @private
+     * @returns {Node}
+     */
+    _pickNode() {
+        let node = this._gateway.pickNode()
+
+        if (!node) {
+            throw new ClientError('no avaiable node')
+        }
+
+        return node
+    }
+
+    /**
+     * @private
+     * @param {ClientConfig} config
+     * @returns {InternalClientConfig}
+     */
+    static _standardizeConfig(config) {
+        let defaultConfig = {
+            endpoints: ['http://localhost:8456'],
+            reorganisationBlocks: 6,
+            updateProviderInterval: 3000
+        }
+
+        return Object.assign(defaultConfig, config)
+    }
+}
+
+module.exports = {
+    Client,
+    ClientError
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 18:47:13 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>

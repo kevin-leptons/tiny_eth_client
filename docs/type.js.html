@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>type.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li><li><a href="Diary.html">Diary</a><ul class='methods'><li data-type='method'><a href="Diary.html#getLogs">getLogs</a></li></ul></li><li><a href="Gateway.html">Gateway</a><ul class='methods'><li data-type='method'><a href="Gateway.html#pickNode">pickNode</a></li></ul></li><li><a href="Node.html">Node</a><ul class='methods'><li data-type='method'><a href="Node.html#call">call</a></li><li data-type='method'><a href="Node.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Node.html#getLogs">getLogs</a></li><li data-type='method'><a href="Node.html#getStat">getStat</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">type.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict'
+
+/**
+ * @typedef {string} EthAddressHeximal
+ *
+ * ETH address, 20 bytes as heximal with prefix "0x".
+ */
+
+/**
+ * @typedef {number} UnsignedInteger
+ *
+ * Unsigned integer number.
+ */
+
+/**
+ * @typedef {string} Heximal
+ *
+ * Hex string with prefix "0x".
+ */
+
+/**
+ * @typedef {string} BlockHashHeximal
+ *
+ * 32 bytes block hash as heximal with prefix "0x".
+ */
+
+/**
+ * @typedef {string} TransactionHash
+ *
+ * 32 bytes transaction hash as heximal with prefix "0x".
+ */
+
+/**
+ * @typedef {object} LogFilter
+ * @property {Array&lt;EthAddressHeximal>} addresses
+ * @property {UnsignedInteger} fromBlock
+ * @property {UnsignedInteger} toBlock
+ * @property {Array&lt;Topic>} topics
+ */
+
+/**
+ * @typedef {object} Log
+ * @property {EthAddressHeximal} address
+ * @property {UnsignedInteger} blockNumber
+ * @property {UnsignedInteger} logIndex
+ * @property {UnsignedInteger} transactionIndex
+ * @property {boolean} removed
+ * @property {Array&lt;Topic>} topics
+ * @property {Heximal} data
+ * @property {BlockHashHeximal} blockHash
+ * @property {TransactionHashHeximal} TransactionHash
+ */
+
+/**
+ * @typedef {object} EthProviderConfig
+ * @property {string} endpoint - URL refer to ETH RPC endpoint.
+ */
+
+/**
+ * @typedef {object} GateWayConfig
+ * @property {UnsignedInteger} [healthcheckInterval] - For each time period,
+ * check health of nodes, in miliseconds. Default is 3000.
+ */
+
+class RpcError extends Error {
+    constructor(error) {
+        super(error.message)
+        this.name = 'RpcError'
+        this.code = error.code
+    }
+}
+
+module.exports = {
+    RpcError
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 18:47:13 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+
+</body>
+</html>
