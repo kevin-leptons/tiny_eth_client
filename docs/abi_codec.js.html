@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>validator.js - Documentation</title>
+    <title>abi_codec.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -34,7 +34,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">validator.js</h1>
+    <h1 class="page-title">abi_codec.js</h1>
     
 
     
@@ -46,21 +46,26 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict'
 
-/**
- *
- * @param {any} value
- * @returns {boolean}
- */
-function isUnsignedInteger(value) {
-    if (!Number.isInteger(value) || value &lt; 0) {
-        return false
-    }
+const {Interface} = require('@ethersproject/abi')
 
-    return true
+/**
+ * * Encode and decode data from [ETH JSON RPC](https://eth.wiki/json-rpc/API).
+ * * This class is the same as
+ *   [ethers.Interface](https://docs.ethers.io/v5/api/utils/abi/interface/).
+ */
+class AbiCodec extends Interface {
+    /**
+     *
+     * @param {any} abi - Specifications of public methods and it's parameters
+     * from a contract.
+     */
+    constructor(abi) {
+        super(abi)
+    }
 }
 
 module.exports = {
-    isUnsignedInteger
+    AbiCodec
 }
 </code></pre>
         </article>
