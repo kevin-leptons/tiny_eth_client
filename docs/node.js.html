@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiInterface.html">AbiInterface</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -48,9 +48,10 @@
 
 const axios = require('axios')
 const {RpcError} = require('./type')
-const {heximalToNumber, numberToHeximal} = require('./formatter')
 
+/*eslint-disable no-unused-vars*/
 const {UnsignedInteger} = require('./type')
+/*eslint-enable no-unused-vars*/
 
 /**
  * @enum {number}
@@ -69,6 +70,11 @@ const NodeStatus = {
  */
 
 /**
+ * @typedef {object} NodeConfig
+ * @property {HttpUrl} endpoint
+ */
+
+/**
  * @private
  */
 class Node {
@@ -77,19 +83,23 @@ class Node {
      * @param {NodeConfig} config
      */
     constructor(config) {
+        let validConfig = Node._standardizeConfig(config)
+
         this._httpClient = axios.create({
-            baseURL: config.endpoint
+            baseURL: validConfig.endpoint
         })
     }
 
     /**
+     * Retrieve stat of this node.
+     *
      * @returns {Promise&lt;NodeStat>}
      */
     async getStat() {
         try {
             return {
                 status: NodeStatus.OK,
-                latestBlockNumer: await this.getBlockNumber()
+                latestBlockNumer: await this._getBlockNumber()
             }
         }
         catch (error) {
@@ -101,41 +111,34 @@ class Node {
     }
 
     /**
+     * Perform a calling to ETH node.
      *
+     * @param {string} method - Method to be call, see
+     * [ETH JSON RPC](https://eth.wiki/json-rpc/API).
+     * @param {Array&lt;any>} params - Positional arguments to pass to method.
+     * @returns {Promise&lt;any>}
+     */
+    async call(method, params) {
+        return await this._call(method, params)
+    }
+
+    /**
+     * Retrieve number of latest block which is mined.
+     *
+     * @private
      * @returns {Promise&lt;number>}
      */
-    async getBlockNumber() {
+    async _getBlockNumber() {
         let result = await this._call('eth_blockNumber', [])
 
         return Number.parseInt(result)
     }
 
     /**
-     *
-     * @param {LogFilter} filter
-     * @returns {Promise&lt;Array&lt;Log>>} - List of matched logs.
-     */
-    async getLogs(filter) {
-        let validFilter = Node._standardFilter(filter)
-        let logs = await this._call('eth_getLogs', [
-            validFilter
-        ])
-
-        return logs.map(Node._formatLog)
-    }
-
-    /**
-     *
-     * @param {Promise&lt;Array | object>} params
-     */
-    async call(params) {
-        return await this._call('eth_call', params)
-    }
-
-    /**
      * @private
-     * @param {string} method
-     * @param {Promise&lt;Array | object>} data
+     * @param {string} method - Mehod to be call.
+     * @param {Array&lt;any>} params - Positional parameters.
+     * @returns {Promise&lt;any>}
      */
     async _call(method, params) {
         let response = await this._httpClient.post('/', {
@@ -154,32 +157,12 @@ class Node {
     }
 
     /**
-     * @private
-     * @param {object} log
-     * @returns {Log}
+     *
+     * @param {any} config
+     * @returns {NodeConfig}
      */
-    static _formatLog(log) {
-        let result = Object.assign({}, log)
-
-        result.blockNumber = heximalToNumber(log.blockNumber)
-        result.logIndex = heximalToNumber(log.logIndex)
-        result.transactionIndex = heximalToNumber(log.transactionIndex)
-
-        return result
-    }
-
-    /**
-     * @private
-     * @param {any} filter
-     * @returns {LogFilter}
-     */
-    static _standardFilter(filter) {
-        let validFilter = Object.assign({}, filter)
-
-        validFilter.fromBlock = numberToHeximal(filter.fromBlock)
-        validFilter.toBlock = numberToHeximal(filter.toBlock)
-
-        return validFilter
+    static _standardizeConfig(config) {
+        return Object.assign({}, config)
     }
 }
 
@@ -201,7 +184,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 20:38:19 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 00:21:44 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

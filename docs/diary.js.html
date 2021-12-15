@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiInterface.html">AbiInterface</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -47,14 +47,35 @@
             <pre class="prettyprint source linenums"><code>'use strict'
 
 const {isUnsignedInteger} = require('./validator')
+const {numberToHeximal, heximalToNumber} = require('./formatter')
 
+/*eslint-disable no-unused-vars*/
 const {Gateway} = require('./gateway')
 const {Node} = require('./node')
-const {UnsignedInteger, LogFilter, Log} = require('./type')
+const {
+    UnsignedInteger,
+    LogFilter,
+    Log,
+    Heximal,
+    EthAddressHeximal
+} = require('./type')
+/*eslint-enable no-unused-vars*/
 
 /**
  * @typedef {object} DiaryConfig
- * @property {UnsignedInteger} maxRetry - Default is 10.
+ * @property {UnsignedInteger} [maxRetry=10] - Number of times for retring
+ * getting log before give up.
+ */
+
+/**
+ * @typedef {object} RpcLogFilter
+ * @property {Heximal} fromBlock - Searching where block number
+ * is greater than or equal this one.
+ * @property {Heximal} toBlock - Searching where block number
+ * is less than or equal this one.
+ * @property {Array&lt;EthAddressHeximal>} [addresses=[]] - List of addresses
+ * that emits log records.
+ * @property {Array&lt;Topic>} [topics=[]] - Searching for matched topics.
  */
 
 class DiaryError extends Error {
@@ -74,7 +95,7 @@ class Diary {
      * @param {DiaryConfig} config
      */
     constructor(gateway, config) {
-        let validConfig = Diary._standardConig(config)
+        let validConfig = Diary._standardizeConfig(config)
 
         this._gateway = gateway
         this._maxRetry = validConfig.maxRetry
@@ -86,12 +107,12 @@ class Diary {
      * @returns {Promise&lt;Array&lt;Log>>}
      */
     async getLogs(filter) {
-        let nowFilter = Diary._standardizeConfig(filter)
+        let nowFilter = Diary._standardizeFilter(filter)
         let node = this._pickNode()
         let logs = []
 
         for (;;) {
-            let logBlock = await node.getLogs(nowFilter)
+            let logBlock = await this._getLogsFromNode(node, nowFilter)
 
             if (logBlock.length === 0) {
                 break
@@ -125,10 +146,50 @@ class Diary {
 
     /**
      * @private
+     * @param {Node} node
+     * @param {LogFilter} filter
+     * @returns {Promise&lt;Array&lt;Log>>}
+     */
+    async _getLogsFromNode(node, filter) {
+        let rpcFilter = Diary._toRpcLogfilter(filter)
+        let logs = await node.call('eth_getLogs', [rpcFilter])
+
+        logs.forEach(Diary._formatLogInplace)
+
+        return logs
+    }
+
+    /**
+     * @private
+     * @param {any} filter
+     * @returns {RpcLogFilter}
+     */
+    static _toRpcLogfilter(filter) {
+        let result = Object.assign({}, filter)
+
+        result.fromBlock = numberToHeximal(filter.fromBlock)
+        result.toBlock = numberToHeximal(filter.toBlock)
+
+        return result
+    }
+
+    /**
+     * @private
+     * @param {any} log
+     * @returns {Log}
+     */
+    static _formatLogInplace(log) {
+        log.blockNumber = heximalToNumber(log.blockNumber)
+        log.logIndex = heximalToNumber(log.logIndex)
+        log.transactionIndex = heximalToNumber(log.transactionIndex)
+    }
+
+    /**
+     * @private
      * @param {object} config
      * @returns {DiaryConfig}
      */
-    static _standardConig(config) {
+    static _standardizeConfig(config) {
         let defaultConfig = {
             maxRetry: 10
         }
@@ -141,7 +202,7 @@ class Diary {
      * @param {object} filter
      * @returns {LogFilter}
      */
-    static _standardizeConfig(filter) {
+    static _standardizeFilter(filter) {
         if (!isUnsignedInteger(filter.fromBlock)) {
             throw new DiaryError('invalid filter.fromBlock')
         }
@@ -178,7 +239,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Tue Dec 14 2021 20:38:19 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 00:21:44 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
