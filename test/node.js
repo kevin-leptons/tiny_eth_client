@@ -17,15 +17,15 @@ describe('Node.call', () => {
     })
 })
 
-describe('Node.getStat', () => {
+describe('Node.updateStat', () => {
     it('should be succeeded', async () => {
         let node = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
-        let actualResult = await node.getStat()
 
-        assert.strictEqual(actualResult.status, NodeStatus.OK)
-        assert.strictEqual(typeof actualResult.latestBlockNumer, 'number')
-        assert.strictEqual(actualResult.message, undefined)
+        await node.updateStat()
+        assert.strictEqual(node.status, NodeStatus.OK)
+        assert.strictEqual(typeof node.latestBlockNumer, 'number')
+        assert.strictEqual(node.error, undefined)
     })
 })
