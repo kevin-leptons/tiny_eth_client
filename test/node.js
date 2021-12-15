@@ -3,49 +3,26 @@
 const assert = require('assert')
 const {Node, NodeStatus} = require('../lib/node')
 
-describe('Node._call', () => {
-    it('succeeded', async () => {
-        let client = new Node({
+describe('Node.call', () => {
+    it('should be succeeded', async () => {
+        let node = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
-        let data = await client._call('eth_getBlockByNumber', ['0x1b4', false])
+        let method = 'eth_getBlockByNumber'
+        let params = ['0x1b4', false]
+        let actualResult = await node.call(method, params)
 
-        assert.strictEqual(data.error, undefined)
-    })
-})
-
-describe('Node.getBlockNumber', () => {
-    it('succeeded', async () => {
-        let client = new Node({
-            endpoint: 'https://bsc-dataseed.binance.org'
-        })
-        let blockNumber = await client.getBlockNumber()
-
-        assert.strictEqual(typeof blockNumber, 'number')
-    })
-})
-
-describe('Node.getLogs', () => {
-    it('succeeded', async () => {
-        let client = new Node({
-            endpoint: 'https://bsc-dataseed.binance.org'
-        })
-        let logs = await client.getLogs({
-            fromBlock: 13437550,
-            toBlock: 13437550
-        })
-
-        assert.strictEqual(Array.isArray(logs), true)
-        assert.strictEqual(logs.length > 1, true)
+        assert.strictEqual(actualResult.error, undefined)
+        assert.strictEqual(actualResult.number, '0x1b4')
     })
 })
 
 describe('Node.getStat', () => {
-    it('succeeded', async () => {
-        let client = new Node({
+    it('should be succeeded', async () => {
+        let node = new Node({
             endpoint: 'https://bsc-dataseed.binance.org'
         })
-        let actualResult = await client.getStat()
+        let actualResult = await node.getStat()
 
         assert.strictEqual(actualResult.status, NodeStatus.OK)
         assert.strictEqual(typeof actualResult.latestBlockNumer, 'number')

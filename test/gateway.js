@@ -38,7 +38,7 @@ describe('Gateway.pickNode', () => {
         }
     })
 
-    it('succeeded', async () => {
+    it('should be succeeded', async () => {
         let healthyNode = await gateway.pickNode()
 
         assert.notStrictEqual(healthyNode, undefined)

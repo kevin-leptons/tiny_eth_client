@@ -36,7 +36,7 @@ describe('Client.getBlockNumber', () => {
         }
     })
 
-    it('succeeded', async () => {
+    it('should be succeeded', async () => {
         let blockNumber = await client.getBlockNumber()
 
         assert.strictEqual(typeof blockNumber, 'number')
@@ -76,7 +76,7 @@ describe('Client.getLogs', () => {
         }
     })
 
-    it('succeeded', async () => {
+    it('should be succeeded', async () => {
         let logs = await client.getLogs({
             fromBlock: 13458853,
             toBlock: 13458853,
