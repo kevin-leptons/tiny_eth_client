@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -883,7 +883,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="client.js.html">client.js</a>, <a href="client.js.html#line11">line 11</a>
+        <a href="client.js.html">client.js</a>, <a href="client.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -1354,7 +1354,7 @@ block number.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="type.js.html">type.js</a>, <a href="type.js.html#line63">line 63</a>
+        <a href="type.js.html">type.js</a>, <a href="type.js.html#line81">line 81</a>
     </li></ul></dd>
     
 
@@ -1475,7 +1475,7 @@ block number.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="type.js.html">type.js</a>, <a href="type.js.html#line68">line 68</a>
+        <a href="type.js.html">type.js</a>, <a href="type.js.html#line86">line 86</a>
     </li></ul></dd>
     
 
@@ -2362,7 +2362,11 @@ that emits log records.</p></td>
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
+        
+        <th>Default</th>
         
 
         <th class="last">Description</th>
@@ -2387,10 +2391,63 @@ that emits log records.</p></td>
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>'http://localhost:8545'</code>
+                
+                </td>
             
 
             <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>weight</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#UnsignedInteger">UnsignedInteger</a></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>It is use for evalution and
+distribution requests between nodes. The greater weight, the more
+requests is dispatch to this node.</p></td>
         </tr>
 
     
@@ -2983,6 +3040,426 @@ that emits log records.</p></td>
 
             
                 
+<h4 class="name" id="Transaction">Transaction</h4>
+
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="type.js.html">type.js</a>, <a href="type.js.html#line63">line 63</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>hash</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">TransactionHashHeximal</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>from</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>blockNumber</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transactionIndex</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonce</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gas</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigInt</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gasPrice</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">BigInt</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>input</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Heximal">Heximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Heximal">Heximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>r</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Heximal">Heximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>s</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Heximal">Heximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>v</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#Heximal">Heximal</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+            
+                
 <h4 class="name" id="TransactionHash">TransactionHash</h4>
 
 
@@ -3145,7 +3622,7 @@ that emits log records.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 01:37:28 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 03:42:44 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -49,9 +49,14 @@
 const {Node} = require('./node')
 const {Gateway} = require('./gateway')
 const {Diary} = require('./diary')
+const {heximalToNumber} = require('./formatter')
 
 /*eslint-disable no-unused-vars*/
-const {LogFilter} = require('./type')
+const {
+    LogFilter,
+    Transaction,
+    TransactionHashHeximal
+} = require('./type')
 /*eslint-enable no-unused-vars*/
 
 /**
@@ -132,6 +137,23 @@ class Client {
     }
 
     /**
+     *
+     * @param {TransactionHashHeximal} txHash
+     * @returns {Transaction | undefined}
+     */
+    async getTransaction(txHash) {
+        let node = await this._pickNode()
+        let transaction = await node.call(
+            'eth_getTransactionByHash',
+            [txHash]
+        )
+
+        Client._formatTransaction(transaction)
+
+        return transaction
+    }
+
+    /**
      * Executes a new message call immediately without creating a transaction
      * on the block chain.
      * It is equivalent to RPC `eth_call`.
@@ -174,6 +196,21 @@ class Client {
 
         return Object.assign(defaultConfig, config)
     }
+
+    /**
+     * Convert data type of attributes inplace.
+     *
+     * @private
+     * @param {any} tx
+     */
+    static _formatTransaction(tx) {
+        tx.blockNumber = heximalToNumber(tx.blockNumber)
+        tx.transactionIndex = heximalToNumber(tx.transactionIndex)
+        tx.type = heximalToNumber(tx.type)
+        tx.nonce = heximalToNumber(tx.nonce)
+        tx.gas = BigInt(tx.gas)
+        tx.gasPrice = BigInt(tx.gasPrice)
+    }
 }
 
 module.exports = {
@@ -194,7 +231,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 01:37:28 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 03:42:44 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
