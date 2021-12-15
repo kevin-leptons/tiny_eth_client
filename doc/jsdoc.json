@@ -7,5 +7,6 @@
         "search": true,
         "typedefs": true,
         "sort": true
-    }
+    },
+    "plugins": ["plugins/markdown"]
 }
