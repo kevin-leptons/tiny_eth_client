@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@ethersproject/abi": "^5.5.0",
+    "@trop/gear": "^0.4.2",
     "axios": "^0.24.0",
     "compute-gcd": "^1.2.1"
   }

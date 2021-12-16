@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Abi">Abi</a></li><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DEFAULT_ENDPOINT">DEFAULT_ENDPOINT</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#Endpoint">Endpoint</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isAbi">isAbi</a></li><li><a href="global.html#isEthAddressHeximal">isEthAddressHeximal</a></li><li><a href="global.html#isPositiveInteger">isPositiveInteger</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#isValidEndpoint">isValidEndpoint</a></li><li><a href="global.html#isValidHttpUrl">isValidHttpUrl</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#PositiveInteger">PositiveInteger</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -47,6 +47,19 @@
             <pre class="prettyprint source linenums"><code>'use strict'
 
 const {AbiCodec} = require('./abi_codec')
+const {isEthAddressHeximal, isAbi} = require('./validator')
+const {Client} = require('./client')
+
+/*eslint-disable no-unused-vars*/
+const {EthAddressHeximal, Abi} = require('./type')
+/*eslint-enable no-unused-vars*/
+
+class ContractError extends Error {
+    constructor(message) {
+        super(message)
+        this.name = 'ContractError'
+    }
+}
 
 /**
  * * Interact with specific contract.
@@ -59,8 +72,15 @@ class Contract {
      * from a contract.
      * @param {Client} client - The contracts interact with ETH nodes
      * via this one.
+     * @throws {ClientError}
      */
     constructor(address, abi, client) {
+        Contract._validateConstructorParams(
+            address,
+            abi,
+            client
+        )
+
         this._address = address
         this._abiCodec = new AbiCodec(abi)
         this._client = client
@@ -85,10 +105,32 @@ class Contract {
 
         return this._abiCodec.decodeFunctionResult(method, result)
     }
+
+    /**
+     * @private
+     * @param {EthAddressHeximal} address
+     * @param {Abi} abi
+     * @param {Client} client
+     * @throws {ClientError}
+     */
+    static _validateConstructorParams(address, abi, client) {
+        if (!isEthAddressHeximal(address)) {
+            throw new ContractError('invalid address')
+        }
+
+        if (!isAbi(abi)) {
+            throw new ContractError('invalid abi')
+        }
+
+        if (!(client instanceof Client)) {
+            throw new ContractError('invalid client')
+        }
+    }
 }
 
 module.exports = {
-    Contract
+    Contract,
+    ContractError
 }
 </code></pre>
         </article>
@@ -104,7 +146,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Wed Dec 15 2021 20:25:49 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Thu Dec 16 2021 02:09:22 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

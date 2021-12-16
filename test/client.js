@@ -5,6 +5,86 @@
 const assert = require('assert')
 const {Client} = require('../lib/client')
 
+describe('Client.constructor', () => {
+    it('default config, successfully', () => {
+        new Client()
+    })
+
+    it('invalid "endpoints.url", throw error', () => {
+        let config = {
+            endpoints: [
+                {url: 'ssh://foo.bar', weight: 1}
+            ]
+        }
+
+        assert.throws(
+            () => new Client(config),
+            {
+                name: 'ClientError',
+                message: 'invalid config.endpoints[0]'
+            }
+        )
+    })
+
+    it('invalid "endpoints.weight", throw error', () => {
+        let config = {
+            endpoints: [
+                {url: 'https://foo.bar', weight: -1}
+            ]
+        }
+
+        assert.throws(
+            () => new Client(config),
+            {
+                name: 'ClientError',
+                message: 'invalid config.endpoints[0]'
+            }
+        )
+    })
+
+    it('invalid "reorganisationBlocks", throw error', () => {
+        let config = {
+            reorganisationBlocks: -1
+        }
+
+        assert.throws(
+            () => new Client(config),
+            {
+                name: 'ClientError',
+                message: 'invalid config.reorganisationBlocks'
+            }
+        )
+    })
+
+    it('invalid "healthCheckInterval", throw error', () => {
+        let config = {
+            healthCheckInterval: 0
+        }
+
+        assert.throws(
+            () => new Client(config),
+            {
+                name: 'ClientError',
+                message: 'invalid config.healthCheckInterval'
+            }
+        )
+    })
+
+    it('invalid attribute name, throw error', () => {
+        let config = {
+            notExistedAttribute: '?'
+        }
+
+        assert.throws(
+            () => new Client(config),
+            {
+                name: 'ClientError',
+                message: 'not accepted config.notExistedAttribute'
+            }
+        )
+    })
+})
+
 describe('Client', () => {
     /**
      * @type {Client}
@@ -13,19 +93,22 @@ describe('Client', () => {
 
     before(async () => {
         let endpoints = [
-            'https://bsc-dataseed.binance.org/',
-            'https://bsc-dataseed1.defibit.io/',
-            'https://bsc-dataseed1.ninicoin.io/',
-            'https://bsc-dataseed2.defibit.io/',
-            'https://bsc-dataseed3.defibit.io/',
-            'https://bsc-dataseed4.defibit.io/',
-            'https://bsc-dataseed2.ninicoin.io/',
-            'https://bsc-dataseed3.ninicoin.io/',
-            'https://bsc-dataseed4.ninicoin.io/',
-            'https://bsc-dataseed1.binance.org/',
-            'https://bsc-dataseed2.binance.org/',
-            'https://bsc-dataseed3.binance.org/',
-            'https://bsc-dataseed4.binance.org/'
+            {
+                url: 'https://bsc-dataseed.binance.org/',
+                weight: 1
+            },
+            {
+                url: 'https://bsc-dataseed1.defibit.io/',
+                weight: 1
+            },
+            {
+                url: 'https://bsc-dataseed1.ninicoin.io/',
+                weight: 1
+            },
+            {
+                url: 'https://bsc-dataseed2.defibit.io/',
+                weight: 1
+            }
         ]
 
         client = new Client({endpoints})
@@ -76,6 +159,92 @@ describe('Client', () => {
             r: '0x8d5ea39feb9214ab8cefbd6b67a5e6fa712a76173f75d5cafa05aec8c1b3563c',
             s: '0x43c9b5e8d80b3a89a7d3f0a5afdc8b1a0d01fb6d415f62d8fecedf3320763277'
         }
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+})
+
+describe('Client._standardizeConfig', () => {
+    it('return correct result', () => {
+        let config = {
+            endpoints: [
+                {url: 'http://foo.bar', weight: 1},
+                {url: 'https://foo.bar', weight: 1}
+            ],
+            reorganisationBlocks: 7,
+            healthCheckInterval: 4000
+        }
+        let actualResult = Client._standardizeConfig(config)
+
+        assert.deepStrictEqual(actualResult, config)
+    })
+
+    it('return default "endpoints"', () => {
+        let config = {
+            reorganisationBlocks: 7,
+            healthCheckInterval: 4000
+        }
+        let expectedResult = {
+            endpoints: [
+                {
+                    url: 'http://localhost:8545',
+                    weight: 1
+                }
+            ],
+            reorganisationBlocks: 7,
+            healthCheckInterval: 4000
+        }
+        let actualResult = Client._standardizeConfig(config)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+
+    it('return default "reorganisationBlocks"', () => {
+        let config = {
+            endpoints: [
+                {
+                    url: 'http://localhost:8545',
+                    weight: 1
+                }
+            ],
+            healthCheckInterval: 4000
+        }
+        let expectedResult = {
+            endpoints: [
+                {
+                    url: 'http://localhost:8545',
+                    weight: 1
+                }
+            ],
+            reorganisationBlocks: 6,
+            healthCheckInterval: 4000
+        }
+        let actualResult = Client._standardizeConfig(config)
+
+        assert.deepStrictEqual(actualResult, expectedResult)
+    })
+
+    it('return default "healthCheckInterval"', () => {
+        let config = {
+            endpoints: [
+                {
+                    url: 'http://localhost:8545',
+                    weight: 1
+                }
+            ],
+            reorganisationBlocks: 7
+        }
+        let expectedResult = {
+            endpoints: [
+                {
+                    url: 'http://localhost:8545',
+                    weight: 1
+                }
+            ],
+            reorganisationBlocks: 7,
+            healthCheckInterval: 3000
+        }
+        let actualResult = Client._standardizeConfig(config)
 
         assert.deepStrictEqual(actualResult, expectedResult)
     })
