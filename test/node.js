@@ -6,6 +6,7 @@ const {Node, NodeStatus} = require('../lib/node')
 describe('Node.call', () => {
     it('should be succeeded', async () => {
         let node = new Node({
+            identity: 1,
             endpoint: 'https://bsc-dataseed.binance.org'
         })
         let method = 'eth_getBlockByNumber'
@@ -20,6 +21,7 @@ describe('Node.call', () => {
 describe('Node.updateStat', () => {
     it('should be succeeded', async () => {
         let node = new Node({
+            identity: 1,
             endpoint: 'https://bsc-dataseed.binance.org'
         })
 

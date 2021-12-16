@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>abi_codec.js - Documentation</title>
+    <title>node_wrr.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -34,7 +34,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">abi_codec.js</h1>
+    <h1 class="page-title">node_wrr.js</h1>
     
 
     
@@ -46,26 +46,145 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict'
 
-const {Interface} = require('@ethersproject/abi')
+const computeGcd = require('compute-gcd')
 
 /**
- * * Encode and decode data from [ETH JSON RPC](https://eth.wiki/json-rpc/API).
- * * This class is the same as
- *   [ethers.Interface](https://docs.ethers.io/v5/api/utils/abi/interface/).
+ * * NodeWrr mean Node Weighted Round Robin.
+ * * Pick a node from a set of nodes by Weighted Round Robin.
+ *
+ * @private
  */
-class AbiCodec extends Interface {
+class NodeWrr {
     /**
      *
-     * @param {any} abi - Specifications of public methods and it's parameters
-     * from a contract.
+     * @param {Array&lt;Node>} nodes
      */
-    constructor(abi) {
-        super(abi)
+    constructor(nodes=[]) {
+        this._initiallize(nodes)
+    }
+
+    /**
+     *
+     * @param {Array&lt;Node>} nodes
+     */
+    update(nodes=[]) {
+        if (NodeWrr._isIdentialNodeList(nodes, this._nodes)) {
+            this._initiallize(nodes)
+        }
+    }
+
+    /**
+     * This implementation is build on algorithm here:
+     * http://kb.linuxvirtualserver.org/wiki/Weighted_Round-Robin_Scheduling
+     *
+     * @returns {Node | undefined}
+     */
+    pick() {
+        if (this._nodes.length === 0) {
+            return undefined
+        }
+
+        /*eslint-disable max-depth*/
+        for (;;) {
+            this._currentIndex = (this._currentIndex + 1) % this._nodes.length
+
+            let node = this._pickCurrentNode()
+
+            switch (node) {
+                case undefined: return undefined
+                case null: continue
+                default: return node
+            }
+        }
+    }
+
+    /**
+     *
+     * @returns {Node | undefined | null}
+     */
+    _pickCurrentNode() {
+        if (this._currentIndex === 0) {
+            this._currentWeight = this._currentWeight - this._gcdWeight
+
+            if (this._currentWeight &lt;= 0) {
+                this._currentWeight = this._maxWeight
+
+                if (this._currentWeight === 0) {
+                    return undefined
+                }
+            }
+        }
+
+        let node = this._nodes[this._currentIndex]
+
+        return (node.weight >= this._currentWeight)
+            ? node
+            : null
+    }
+
+    /**
+     *
+     * @param {Array&lt;Node>} nodes
+     */
+    _initiallize(nodes) {
+        this._nodes = nodes
+        this._currentIndex = -1
+        this._currentWeight = 0
+        this._maxWeight = NodeWrr._getMaxWeight(this._nodes)
+        this._gcdWeight = NodeWrr._getGcdWeight(this._nodes)
+    }
+
+    /**
+     *
+     * @param {Array&lt;Node>} list1
+     * @param {Array&lt;Node>} list2
+     * @returns {boolean}
+     */
+    static _isIdentialNodeList(list1, list2) {
+        if (list1.length !== list2.length) {
+            return true
+        }
+
+        for (let i = 0; i &lt; list1.length; ++i) {
+            if (list1[i].identity !== list2[i].identity) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * @private
+     * @param {Array&lt;Node>} nodes
+     * @returns {number}
+     */
+    static _getMaxWeight(nodes) {
+        let result = 0
+
+        for (let node of nodes) {
+            if (node.weight > result) {
+                result = node.weight
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * @private
+     * @param {Array&lt;Node>} nodes
+     * @returns {number}
+     */
+    static _getGcdWeight(nodes) {
+        let weights = nodes.map(node => node.weight)
+
+        return computeGcd(weights)
     }
 }
 
 module.exports = {
-    AbiCodec
+    NodeWrr
 }
 </code></pre>
         </article>

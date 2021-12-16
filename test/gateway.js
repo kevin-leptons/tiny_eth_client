@@ -9,6 +9,7 @@ describe('Gateway.pickNode', () => {
      * @type {Gateway}
      */
     let gateway
+    let totalWeight
 
     before(async () => {
         let endpoints = [
@@ -16,18 +17,19 @@ describe('Gateway.pickNode', () => {
             'https://bsc-dataseed1.defibit.io/',
             'https://bsc-dataseed1.ninicoin.io/',
             'https://bsc-dataseed2.defibit.io/',
-            'https://bsc-dataseed3.defibit.io/',
-            'https://bsc-dataseed4.defibit.io/',
-            'https://bsc-dataseed2.ninicoin.io/',
-            'https://bsc-dataseed3.ninicoin.io/',
-            'https://bsc-dataseed4.ninicoin.io/',
-            'https://bsc-dataseed1.binance.org/',
-            'https://bsc-dataseed2.binance.org/',
-            'https://bsc-dataseed3.binance.org/',
-            'https://bsc-dataseed4.binance.org/'
+            'https://bsc-dataseed3.defibit.io/'
         ]
-        let nodes = endpoints.map(endpoint => new Node({endpoint}))
+        let nodes = endpoints.map((endpoint, index) => {
+            return new Node({
+                identity: index + 1,
+                endpoint: endpoint,
+                weight: index
+            })
+        })
 
+        totalWeight = nodes.reduce((total, node) => {
+            return total + node.weight
+        }, 0)
         gateway = new Gateway(nodes)
         await gateway.open()
     })
@@ -39,8 +41,18 @@ describe('Gateway.pickNode', () => {
     })
 
     it('should be succeeded', async () => {
-        let healthyNode = await gateway.pickNode()
+        let expectedResult = [
+            5, 4, 5, 3, 4,
+            5, 2, 3, 4, 5
+        ]
+        let actualResult = []
 
-        assert.notStrictEqual(healthyNode, undefined)
+        for (let i = 1; i <= totalWeight; ++i) {
+            let node = await gateway.pickNode()
+
+            actualResult.push(node.identity)
+        }
+
+        assert.deepStrictEqual(actualResult, expectedResult)
     })
 })

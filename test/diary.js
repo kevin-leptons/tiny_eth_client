@@ -27,7 +27,12 @@ describe('Diary.getLogs', () => {
             'https://bsc-dataseed3.binance.org/',
             'https://bsc-dataseed4.binance.org/'
         ]
-        let nodes = endpoints.map(endpoint => new Node({endpoint}))
+        let nodes = endpoints.map((endpoint, index) => {
+            return new Node({
+                identity: index,
+                endpoint: endpoint
+            })
+        })
 
         gateway = new Gateway(nodes)
         await gateway.open()
