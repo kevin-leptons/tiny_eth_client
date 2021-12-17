@@ -6,15 +6,20 @@
 ## Client
 
 ```js
-'use strict'
-
-const {Client} = require('tiny_eth_client')
-
 async function main() {
     let endpoints = [
-        'https://bsc-dataseed.binance.org/',
-        'https://bsc-dataseed1.defibit.io/',
-        'https://bsc-dataseed1.ninicoin.io/'
+        {
+            url: 'https://bsc-dataseed.binance.org/',
+            weight: 1
+        },
+        {
+            url: 'https://bsc-dataseed1.defibit.io/',
+            weight: 3
+        },
+        {
+            url: 'https://bsc-dataseed1.ninicoin.io/',
+            weight: 2
+        }
     ]
     let client = new Client({
         endpoints
@@ -29,7 +34,7 @@ async function main() {
             toBlock: 13463807
         })
 
-        console.log(logs)
+        console.log(logs, client.blockNumber)
     }
     finally {
         await client.close()
@@ -42,16 +47,20 @@ main().catch(console.error)
 ## Contract
 
 ```js
-'use strict'
-
-const {Client, Contract} = require('tiny_eth_client')
-const UniswapV2PoolAbi = require('../test/_data/uniswap_v2_pool_abi.json')
-
 async function main() {
     let endpoints = [
-        'https://bsc-dataseed.binance.org/',
-        'https://bsc-dataseed1.defibit.io/',
-        'https://bsc-dataseed1.ninicoin.io/'
+        {
+            url: 'https://bsc-dataseed.binance.org/',
+            weight: 1
+        },
+        {
+            url: 'https://bsc-dataseed1.defibit.io/',
+            weight: 3
+        },
+        {
+            url: 'https://bsc-dataseed1.ninicoin.io/',
+            weight: 2
+        }
     ]
     let client = new Client({
         endpoints

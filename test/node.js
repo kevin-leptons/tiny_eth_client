@@ -27,7 +27,7 @@ describe('Node.updateStat', () => {
 
         await node.updateStat()
         assert.strictEqual(node.status, NodeStatus.OK)
-        assert.strictEqual(typeof node.latestBlockNumer, 'number')
+        assert.strictEqual(typeof node.blockNumber, 'number')
         assert.strictEqual(node.error, undefined)
     })
 })

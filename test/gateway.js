@@ -53,6 +53,6 @@ describe('Gateway.pickNode', () => {
             actualResult.push(node.identity)
         }
 
-        // assert.deepStrictEqual(actualResult, expectedResult)
+        assert.deepStrictEqual(actualResult, expectedResult)
     })
 })

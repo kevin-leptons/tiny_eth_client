@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getBlockNumber">getBlockNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Abi">Abi</a></li><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DEFAULT_ENDPOINT">DEFAULT_ENDPOINT</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#Endpoint">Endpoint</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isAbi">isAbi</a></li><li><a href="global.html#isEthAddressHeximal">isEthAddressHeximal</a></li><li><a href="global.html#isPositiveInteger">isPositiveInteger</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#isValidEndpoint">isValidEndpoint</a></li><li><a href="global.html#isValidHttpUrl">isValidHttpUrl</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#PositiveInteger">PositiveInteger</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#call">call</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Abi">Abi</a></li><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DEFAULT_ENDPOINT">DEFAULT_ENDPOINT</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#Endpoint">Endpoint</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isAbi">isAbi</a></li><li><a href="global.html#isEthAddressHeximal">isEthAddressHeximal</a></li><li><a href="global.html#isPositiveInteger">isPositiveInteger</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#isValidEndpoint">isValidEndpoint</a></li><li><a href="global.html#isValidHttpUrl">isValidHttpUrl</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#PositiveInteger">PositiveInteger</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -80,7 +80,7 @@ class Gateway {
 
         this._nodes = nodes
         this._healthcheckInterval = validConfig.healthcheckInterval
-        this._nodePointer = undefined
+        this._reorganisationBlock = validConfig.reorganisationBlocks
         this._nodeWrr = new NodeWrr()
     }
 
@@ -105,6 +105,17 @@ class Gateway {
     }
 
     /**
+     * @returns {number | undefined}
+     */
+    get blockNumber() {
+        return this._nodeWrr.blockNumber
+    }
+
+    get safeBlockNumber() {
+        return this._safeBlockNumber
+    }
+
+    /**
      * @returns {Promise&lt;Node | undefined>}
      */
     pickNode() {
@@ -125,6 +136,25 @@ class Gateway {
         let topNodes = Gateway._pickTopNodes(healthyNodes)
 
         this._nodeWrr.update(topNodes)
+        this._updateSafeBlockNumber()
+    }
+
+    /**
+     * Update attribute "_safeBlockNumber".
+     *
+     * @returns {undefined}
+     */
+    _updateSafeBlockNumber() {
+        let safeBlockNumber =
+            this._nodeWrr.blockNumber - this._reorganisationBlock
+
+        if (!Number.isInteger(safeBlockNumber) || safeBlockNumber &lt; 0) {
+            this._safeBlockNumber = undefined
+
+            return
+        }
+
+        this._safeBlockNumber = safeBlockNumber
     }
 
     /**
@@ -134,7 +164,8 @@ class Gateway {
      */
     static _standardizeConfig(config) {
         let defaultConfig = {
-            healthcheckInterval: 3000
+            healthcheckInterval: 3000,
+            reorganisationBlocks: 6
         }
 
         return Object.assign(defaultConfig, config)
@@ -150,7 +181,7 @@ class Gateway {
         let result = []
 
         for (let node of nodes) {
-            if (node.latestBlockNumer === topBlockNumber) {
+            if (node.blockNumber === topBlockNumber) {
                 result.push(node)
             }
         }
@@ -168,11 +199,11 @@ class Gateway {
             return undefined
         }
 
-        let result = nodes[0].latestBlockNumer
+        let result = nodes[0].blockNumber
 
         for (let node of nodes) {
-            if (node.latestBlockNumer > result) {
-                result = node.latestBlockNumer
+            if (node.blockNumber > result) {
+                result = node.blockNumber
             }
         }
 
@@ -198,7 +229,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Thu Dec 16 2021 02:51:19 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Thu Dec 16 2021 18:44:28 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
