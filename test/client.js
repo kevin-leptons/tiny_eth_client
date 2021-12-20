@@ -125,6 +125,13 @@ describe('Client', () => {
         assert.strictEqual(typeof client.blockNumber, 'number')
     })
 
+    it('getBlockByNumber', async () => {
+        let block = await client.getBlockByNumber(13458853)
+
+        assert.deepStrictEqual(block.number, 13458853)
+        assert.deepStrictEqual(block.timestamp, 1639457652)
+    })
+
     it('getLogs', async () => {
         let logs = await client.getLogs({
             fromBlock: 13458853,

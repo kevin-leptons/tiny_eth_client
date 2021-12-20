@@ -29,7 +29,7 @@
     
     <input type="text" id="nav-search" placeholder="Search" />
     
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Abi">Abi</a></li><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DEFAULT_ENDPOINT">DEFAULT_ENDPOINT</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#Endpoint">Endpoint</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isAbi">isAbi</a></li><li><a href="global.html#isEthAddressHeximal">isEthAddressHeximal</a></li><li><a href="global.html#isPositiveInteger">isPositiveInteger</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#isValidEndpoint">isValidEndpoint</a></li><li><a href="global.html#isValidHttpUrl">isValidHttpUrl</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#PositiveInteger">PositiveInteger</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AbiCodec.html">AbiCodec</a></li><li><a href="Client.html">Client</a><ul class='methods'><li data-type='method'><a href="Client.html#._standardizeBlock">_standardizeBlock</a></li><li data-type='method'><a href="Client.html#getBlockByNumber">getBlockByNumber</a></li><li data-type='method'><a href="Client.html#getLogs">getLogs</a></li><li data-type='method'><a href="Client.html#getTransaction">getTransaction</a></li></ul></li><li><a href="Contract.html">Contract</a><ul class='methods'><li data-type='method'><a href="Contract.html#call">call</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#Abi">Abi</a></li><li><a href="global.html#Block">Block</a></li><li><a href="global.html#BlockHashHeximal">BlockHashHeximal</a></li><li><a href="global.html#ClientConfig">ClientConfig</a></li><li><a href="global.html#DEFAULT_ENDPOINT">DEFAULT_ENDPOINT</a></li><li><a href="global.html#DiaryConfig">DiaryConfig</a></li><li><a href="global.html#Endpoint">Endpoint</a></li><li><a href="global.html#EthAddressHeximal">EthAddressHeximal</a></li><li><a href="global.html#EthProviderConfig">EthProviderConfig</a></li><li><a href="global.html#GateWayConfig">GateWayConfig</a></li><li><a href="global.html#Heximal">Heximal</a></li><li><a href="global.html#heximalToNumber">heximalToNumber</a></li><li><a href="global.html#HttpUrl">HttpUrl</a></li><li><a href="global.html#isAbi">isAbi</a></li><li><a href="global.html#isEthAddressHeximal">isEthAddressHeximal</a></li><li><a href="global.html#isPositiveInteger">isPositiveInteger</a></li><li><a href="global.html#isUnsignedInteger">isUnsignedInteger</a></li><li><a href="global.html#isValidEndpoint">isValidEndpoint</a></li><li><a href="global.html#isValidHttpUrl">isValidHttpUrl</a></li><li><a href="global.html#Log">Log</a></li><li><a href="global.html#LogFilter">LogFilter</a></li><li><a href="global.html#NodeConfig">NodeConfig</a></li><li><a href="global.html#NodeStat">NodeStat</a></li><li><a href="global.html#NodeStatus">NodeStatus</a></li><li><a href="global.html#numberToHeximal">numberToHeximal</a></li><li><a href="global.html#PositiveInteger">PositiveInteger</a></li><li><a href="global.html#RpcLogFilter">RpcLogFilter</a></li><li><a href="global.html#TrackedNode">TrackedNode</a></li><li><a href="global.html#Transaction">Transaction</a></li><li><a href="global.html#TransactionHash">TransactionHash</a></li><li><a href="global.html#UnsignedInteger">UnsignedInteger</a></li></ul>
 </nav>
 
 <div id="main">
@@ -49,7 +49,7 @@
 const {Node} = require('./node')
 const {Gateway} = require('./gateway')
 const {Diary} = require('./diary')
-const {heximalToNumber} = require('./formatter')
+const {heximalToNumber, numberToHeximal} = require('./formatter')
 const {
     isUnsignedInteger,
     isPositiveInteger,
@@ -62,7 +62,9 @@ const {
     LogFilter,
     Transaction,
     TransactionHashHeximal,
-    PositiveInteger
+    PositiveInteger,
+    UnsignedInteger,
+    Block
 } = require('./type')
 /*eslint-enable no-unused-vars*/
 
@@ -139,6 +141,28 @@ class Client {
      */
     get blockNumber() {
         return this._gateway.safeBlockNumber
+    }
+
+    /**
+     *
+     * @param {UnsignedInteger} blockNumber
+     * @param {boolean} [includeTransaction=false]
+     * @returns {Promise&lt;Block>}
+     */
+    async getBlockByNumber(blockNumber, includeTransaction=false) {
+        let node = this._pickNode()
+        let blockNumberHeximal = numberToHeximal(blockNumber)
+
+        if (blockNumberHeximal === undefined) {
+            throw new ClientError('invalid block number')
+        }
+
+        let block = await node.call(
+            'eth_getBlockByNumber',
+            [blockNumberHeximal, includeTransaction]
+        )
+
+        return Client._standardizeBlock(block)
     }
 
     /**
@@ -294,6 +318,18 @@ class Client {
             }
         }
     }
+
+    /**
+     *
+     * @param {Block} block
+     * @returns {Block}
+     */
+    static _standardizeBlock(block) {
+        block.number = heximalToNumber(block.number)
+        block.timestamp = heximalToNumber(block.timestamp)
+
+        return block
+    }
 }
 
 module.exports = {
@@ -314,7 +350,7 @@ module.exports = {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Thu Dec 16 2021 21:41:45 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Mon Dec 20 2021 02:13:37 GMT-0800 (Pacific Standard Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
