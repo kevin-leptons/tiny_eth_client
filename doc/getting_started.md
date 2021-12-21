@@ -6,6 +6,8 @@
 ## Client
 
 ```js
+const {Client} = require('tiny_eth_client')
+
 async function main() {
     let endpoints = [
         {
@@ -29,12 +31,12 @@ async function main() {
 
     try {
         let logs = await client.getLogs({
-            address: '0x58f876857a02d6762e0101bb5c46a8c1ed44dc16',
+            addresses: ['0x58f876857a02d6762e0101bb5c46a8c1ed44dc16'],
             fromBlock: 13463805,
-            toBlock: 13463807
+            toBlock: 13463805
         })
 
-        console.log(logs, client.blockNumber)
+        console.log(logs, logs.length, client.blockNumber)
     }
     finally {
         await client.close()

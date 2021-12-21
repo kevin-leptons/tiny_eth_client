@@ -40,7 +40,7 @@ describe('Diary.getLogs', () => {
         let logs = await diary.getLogs({
             fromBlock: 13458853,
             toBlock: 13458853,
-            address: [
+            addresses: [
                 '0x804678fa97d91b974ec2af3c843270886528a9e6'
             ]
         })
